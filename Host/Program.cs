@@ -11,6 +11,7 @@ namespace NetworkTest
 {
     static class Program
     {
+        static int msgs = 0;
         static byte[] buffer = new byte[1024];
         static List<Socket> ClientSocketsList = new List<Socket>();
         static Socket MainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -28,13 +29,15 @@ namespace NetworkTest
 
             MainSocket.Listen(5);
             MainSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
+            Console.Clear();
+            Console.WriteLine("server ready");
         }
         static void AcceptCallback(IAsyncResult AR)
         {
             Socket socket = MainSocket.EndAccept(AR);
             ClientSocketsList.Add(socket);
             Console.Clear();
-            Console.WriteLine("client connected");
+            Console.WriteLine($"client {ClientSocketsList.Count} connected");
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);
             MainSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
         }
@@ -49,7 +52,7 @@ namespace NetworkTest
             string text = Encoding.ASCII.GetString(DataBuffer);
             Console.WriteLine("text recieved: " + text);
 
-            byte[] DataToSend = Encoding.ASCII.GetBytes("message recieved");
+            byte[] DataToSend = Encoding.ASCII.GetBytes($"message {++msgs} recieved");
             socket.BeginSend(DataToSend, 0, DataToSend.Length, SocketFlags.None, new AsyncCallback(SendCallBack), socket);
 
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);

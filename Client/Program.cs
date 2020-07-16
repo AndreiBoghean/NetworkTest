@@ -16,7 +16,6 @@ namespace Client
             Console.Title = "Client";
             LoopConnect();
             LoopSend();
-            Console.ReadLine();
         }
 
         static void LoopConnect()
@@ -55,12 +54,12 @@ namespace Client
 
                 byte[] Recieved = new byte[rec];
                 Array.Copy(RecievedBuffer, Recieved, rec);
-                /*
-                Console.BackgroundColor = ConsoleColor.Magenta;
-                Console.WriteLine(Encoding.ASCII.GetString(Recieved) );
-                Console.BackgroundColor = ConsoleColor.Black;
-                */
             }
+        }
+
+        static void LoopRecieve()
+        {
+            ClientSocket.BeginReceive();
         }
     }
 }
