@@ -48,18 +48,20 @@ namespace Client
                 Console.WriteLine("enter a message");
                 ClientSocket.Send(Encoding.ASCII.GetBytes(Console.ReadLine()));
 
+                /*
                 byte[] RecievedBuffer = new byte[1024];
 
                 int rec = ClientSocket.Receive(RecievedBuffer);
 
                 byte[] Recieved = new byte[rec];
                 Array.Copy(RecievedBuffer, Recieved, rec);
+                */
             }
         }
 
         static void LoopRecieve()
         {
-            ClientSocket.BeginReceive();
+            //ClientSocket.BeginReceive();
         }
     }
 }
