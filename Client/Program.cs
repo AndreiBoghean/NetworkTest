@@ -10,7 +10,8 @@ namespace Client
 {
     static class Program
     {
-        static Socket ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        static Socket HostSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
         static void Main(string[] args)
         {
             Console.Title = "Client";
@@ -21,24 +22,36 @@ namespace Client
         static void LoopConnect()
         {
             int attempts = 0;
-
-            while (!ClientSocket.Connected)
+            Console.WriteLine("enter IP to connect to (enter \"auto\" to go start at 0 and keep trying)");
+            string inp = Console.ReadLine();
+            string GoalIp = "";
+            while (!HostSocket.Connected)
             {
+                attempts++;
+                switch (inp)
+                {
+                    case "auto":
+                        GoalIp = "192.168.1." + attempts;
+                        break;
+                    default:
+                        GoalIp = inp;
+                        break;
+                }
                 try
                 {
-                    attempts++;
-                    ClientSocket.Connect(IPAddress.Loopback, 100);
+                    HostSocket.Connect(GoalIp, 23000);
                 }
                 catch (SocketException)
                 {
                     Console.Clear();
-                    Console.WriteLine($"attempt number {attempts} has failed");
+                    Console.WriteLine($"attempt number {attempts} to connect to {GoalIp} has failed");
                 }
             }
 
             Console.Clear();
-            Console.WriteLine("connected at attempt number " + attempts);
+            Console.WriteLine($"connected at attempt number {attempts}");
         }
+
 
         static void LoopSend()
         {
@@ -46,22 +59,12 @@ namespace Client
             {
                 Console.WriteLine();
                 Console.WriteLine("enter a message");
-                ClientSocket.Send(Encoding.ASCII.GetBytes(Console.ReadLine()));
+                HostSocket.Send(Encoding.ASCII.GetBytes(Console.ReadLine()));
 
-                /*
-                byte[] RecievedBuffer = new byte[1024];
-
-                int rec = ClientSocket.Receive(RecievedBuffer);
-
-                byte[] Recieved = new byte[rec];
-                Array.Copy(RecievedBuffer, Recieved, rec);
-                */
+                byte[] RecievedBuffer = new byte[10240];
+                HostSocket.Receive(RecievedBuffer, SocketFlags.None);
+                Console.WriteLine(Encoding.ASCII.GetString(RecievedBuffer) );
             }
-        }
-
-        static void LoopRecieve()
-        {
-            //ClientSocket.BeginReceive();
         }
     }
 }

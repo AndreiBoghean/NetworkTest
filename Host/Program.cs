@@ -12,7 +12,7 @@ namespace NetworkTest
     static class Program
     {
         static int msgs = 0;
-        static byte[] buffer = new byte[1024];
+        static byte[] buffer = new byte[102400];
         static List<Socket> ClientSocketsList = new List<Socket>();
         static Socket MainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         static void Main(string[] args)
@@ -25,12 +25,15 @@ namespace NetworkTest
         static void StartServer()
         {
             Console.WriteLine("starting server...");
-            MainSocket.Bind(new IPEndPoint(IPAddress.Any, 100) );
+            IPAddress ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Single(addresses => addresses.AddressFamily == AddressFamily.InterNetwork);
+            
+            MainSocket.Bind(new IPEndPoint(ip, 23000) );
 
             MainSocket.Listen(5);
             MainSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
+
             Console.Clear();
-            Console.WriteLine("server ready");
+            Console.WriteLine($"began server at {ip} 23000");
         }
         static void AcceptCallback(IAsyncResult AR)
         {
@@ -49,13 +52,14 @@ namespace NetworkTest
             byte[] DataBuffer = new byte[recieved];
             Array.Copy(buffer, DataBuffer, recieved);
 
-            string text = Encoding.ASCII.GetString(DataBuffer);
-            Console.WriteLine("text recieved: " + text);
-
-            byte[] DataToSend = Encoding.ASCII.GetBytes($"message {++msgs} recieved");
-            socket.BeginSend(DataToSend, 0, DataToSend.Length, SocketFlags.None, new AsyncCallback(SendCallBack), socket);
+            Console.WriteLine($"text recieved from {socket.RemoteEndPoint}: {Encoding.ASCII.GetString(DataBuffer)}");
 
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);
+
+            Console.WriteLine();
+            Console.WriteLine("enter reply");
+            byte[] DataToSend = Encoding.ASCII.GetBytes($"reply from host: " + Console.ReadLine() );
+            socket.BeginSend(DataToSend, 0, DataToSend.Length, SocketFlags.None, new AsyncCallback(SendCallBack), socket);
         }
 
         static void SendCallBack(IAsyncResult AR)
