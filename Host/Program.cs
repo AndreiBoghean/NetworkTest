@@ -11,10 +11,10 @@ namespace NetworkTest
 {
     static class Program
     {
-        static int msgs = 0;
-        static byte[] buffer = new byte[102400];
+        static byte[] buffer = new byte[65536];
         static List<Socket> ClientSocketsList = new List<Socket>();
         static Socket MainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
         static void Main(string[] args)
         {
             Console.Title = "Host";
@@ -24,23 +24,33 @@ namespace NetworkTest
 
         static void StartServer()
         {
-            Console.WriteLine("starting server...");
-            IPAddress ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Single(addresses => addresses.AddressFamily == AddressFamily.InterNetwork);
-            
-            MainSocket.Bind(new IPEndPoint(ip, 23000) );
+            IPAddress addr;
+            Console.WriteLine("enter IP address to start at");
+            switch (Console.ReadLine())
+            {
+                case "DEF": addr = IPAddress.Parse("192.168.0.11"); break;
+                default: addr = IPAddress.Parse(Console.ReadLine()); break;
+            }
+
+            int port;
+            Console.WriteLine("enter port to start at");
+            switch (Console.ReadLine())
+            {
+                case "DEF": port = 27015; break;
+                default: port = Convert.ToInt32(Console.ReadLine()); break;
+            }
+
+            MainSocket.Bind(new IPEndPoint(addr, port));
 
             MainSocket.Listen(5);
             MainSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
-
-            Console.Clear();
-            Console.WriteLine($"began server at {ip} 23000");
         }
         static void AcceptCallback(IAsyncResult AR)
         {
             Socket socket = MainSocket.EndAccept(AR);
             ClientSocketsList.Add(socket);
             Console.Clear();
-            Console.WriteLine($"client {ClientSocketsList.Count} connected");
+            Console.WriteLine("client connected");
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);
             MainSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
         }
@@ -52,14 +62,14 @@ namespace NetworkTest
             byte[] DataBuffer = new byte[recieved];
             Array.Copy(buffer, DataBuffer, recieved);
 
-            Console.WriteLine($"text recieved from {socket.RemoteEndPoint}: {Encoding.ASCII.GetString(DataBuffer)}");
+            string text = Encoding.ASCII.GetString(DataBuffer);
+            Console.WriteLine("text recieved: " + text);
+
+            Console.WriteLine("enter reply");
+            byte[] DataToSend = Encoding.ASCII.GetBytes("reply recieved: " + Console.ReadLine());
+            socket.BeginSend(DataToSend, 0, DataToSend.Length, SocketFlags.None, new AsyncCallback(SendCallBack), socket);
 
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);
-
-            Console.WriteLine();
-            Console.WriteLine("enter reply");
-            byte[] DataToSend = Encoding.ASCII.GetBytes($"reply from host: " + Console.ReadLine() );
-            socket.BeginSend(DataToSend, 0, DataToSend.Length, SocketFlags.None, new AsyncCallback(SendCallBack), socket);
         }
 
         static void SendCallBack(IAsyncResult AR)
@@ -68,4 +78,3 @@ namespace NetworkTest
             socket.EndSend(AR);
         }
     }
-}

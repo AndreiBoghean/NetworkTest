@@ -10,48 +10,49 @@ namespace Client
 {
     static class Program
     {
-        static Socket HostSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
+        static Socket ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         static void Main(string[] args)
         {
             Console.Title = "Client";
             LoopConnect();
             LoopSend();
+            Console.ReadLine();
         }
 
         static void LoopConnect()
         {
             int attempts = 0;
-            Console.WriteLine("enter IP to connect to (enter \"auto\" to go start at 0 and keep trying)");
-            string inp = Console.ReadLine();
-            string GoalIp = "";
-            while (!HostSocket.Connected)
+
+            IPAddress addr;
+            Console.WriteLine("enter IP address to connect to");
+            switch (Console.ReadLine())
+            {
+                case "DEF": addr = IPAddress.Parse("82.28.37.155"); break;
+                default: addr = IPAddress.Parse(Console.ReadLine()); break;
+            }
+
+            int port;
+            Console.WriteLine("enter port to connect to");
+            switch (Console.ReadLine())
+            {
+                case "DEF": port = 27015; break;
+                default: port = Convert.ToInt32(Console.ReadLine()); break;
+            }
+
+            while (!ClientSocket.Connected)
             {
                 attempts++;
-                switch (inp)
-                {
-                    case "auto":
-                        GoalIp = "192.168.1." + attempts;
-                        break;
-                    default:
-                        GoalIp = inp;
-                        break;
-                }
-                try
-                {
-                    HostSocket.Connect(GoalIp, 23000);
-                }
+                try { ClientSocket.Connect(addr, port); }
                 catch (SocketException)
                 {
                     Console.Clear();
-                    Console.WriteLine($"attempt number {attempts} to connect to {GoalIp} has failed");
+                    Console.WriteLine($"attempt number {attempts} has failed");
                 }
             }
 
             Console.Clear();
-            Console.WriteLine($"connected at attempt number {attempts}");
+            Console.WriteLine("connected at attempt number " + attempts);
         }
-
 
         static void LoopSend()
         {
@@ -59,11 +60,16 @@ namespace Client
             {
                 Console.WriteLine();
                 Console.WriteLine("enter a message");
-                HostSocket.Send(Encoding.ASCII.GetBytes(Console.ReadLine()));
+                ClientSocket.Send(Encoding.ASCII.GetBytes(Console.ReadLine()));
+                
+                byte[] RecievedBuffer = new byte[65536];
 
-                byte[] RecievedBuffer = new byte[10240];
-                HostSocket.Receive(RecievedBuffer, SocketFlags.None);
-                Console.WriteLine(Encoding.ASCII.GetString(RecievedBuffer) );
+                int rec = ClientSocket.Receive(RecievedBuffer);
+
+                byte[] Recieved = new byte[rec];
+                Array.Copy(RecievedBuffer, Recieved, rec);
+
+                Console.WriteLine("reply recived: " + Encoding.ASCII.GetString(Recieved) );
             }
         }
     }

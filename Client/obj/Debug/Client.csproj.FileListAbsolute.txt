@@ -1,0 +1,7 @@
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\bin\Debug\Client.exe.config
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\bin\Debug\Client.exe
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\bin\Debug\Client.pdb
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\obj\Debug\Client.csprojAssemblyReference.cache
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\obj\Debug\Client.exe
+C:\Users\Andrei\Desktop\NetworkTest-7b5ac302be02bc91f8b376663d0a4c2993f4a17e\Client\obj\Debug\Client.pdb
